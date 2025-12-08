@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { X, Trash, Plus, Minus, ShoppingBag } from "phosphor-react";
-import { motion, AnimatePresence } from "framer-motion"; // <--- Import
+import { motion, AnimatePresence } from "framer-motion";
 import {
   closeCart,
   removeFromCart,
@@ -15,7 +15,6 @@ const CartDrawer = () => {
   const navigate = useNavigate();
   const { items, totalAmount, isCartOpen } = useSelector((state) => state.cart);
 
-  // Disable body scroll logic (keep existing)
   useEffect(() => {
     if (isCartOpen) {
       document.body.style.overflow = "hidden";
@@ -29,7 +28,7 @@ const CartDrawer = () => {
 
   const handleCheckout = () => {
     dispatch(closeCart());
-    navigate("/checkout"); // Updated to point to checkout page
+    navigate("/checkout");
   };
 
   return (
@@ -41,7 +40,7 @@ const CartDrawer = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(closeCart())}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[99] bg-black/60 backdrop-blur-sm"
           />
 
           <motion.div
@@ -49,7 +48,7 @@ const CartDrawer = () => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl dark:bg-slate-900"
+            className="fixed inset-y-0 right-0 z-100 w-full max-w-md bg-white shadow-2xl dark:bg-slate-900"
           >
             <div className="flex h-full flex-col text-gray-900 dark:text-white">
               {/* Header */}
@@ -139,7 +138,6 @@ const CartDrawer = () => {
                 )}
               </div>
 
-              {/* Footer (Keep existing) */}
               {items.length > 0 && (
                 <div className="border-t border-gray-100 bg-gray-50 p-6 dark:bg-slate-800 dark:border-slate-700">
                   <div className="mb-4 flex justify-between text-lg font-bold">

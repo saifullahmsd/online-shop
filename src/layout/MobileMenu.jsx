@@ -24,17 +24,16 @@ const MobileMenu = ({ isOpen, setIsOpen }) => {
   const handleMobileSearch = (e) => {
     e.preventDefault();
     if (mobileSearch.trim()) {
-      setIsOpen(false); // Close menu
-      navigate(`/products?search=${mobileSearch}`); // Go to results
+      setIsOpen(false);
+      navigate(`/products?search=${mobileSearch}`); //
     }
   };
 
   return (
     <>
-      {/* 1. Backdrop (Overlay) */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ${
+        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity ${
           isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />

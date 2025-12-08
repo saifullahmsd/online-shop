@@ -1,7 +1,6 @@
 import React from "react";
 
 const AddressForm = ({ formData, handleChange }) => {
-  // Common classes variable bana diya taake code clean rahay aur bar bar repeat na ho
   const inputClasses =
     "w-full rounded-lg border border-gray-300 p-2.5 focus:border-primary focus:bg-white focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:bg-gray-700";
 

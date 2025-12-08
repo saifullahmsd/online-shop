@@ -187,8 +187,7 @@ const ProductDetail = () => {
               {product.description}
             </p>
 
-            {/* Sticky Cart Bar (Mobile) / Normal (Desktop) */}
-            <div className="fixed bottom-0 inset-x-0 z-40 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800 md:static md:mb-8 md:border-0 md:bg-transparent md:p-0 md:shadow-none">
+            <div className="fixed bottom-0 inset-x-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800 md:static md:mb-8 md:border-0 md:bg-transparent md:p-0 md:shadow-none">
               <div className="flex flex-col gap-4 sm:flex-row container mx-auto md:w-auto md:mx-0">
                 {/* Quantity */}
                 <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 dark:bg-slate-800 dark:border-slate-700 md:w-auto">

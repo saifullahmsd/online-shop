@@ -15,7 +15,7 @@ import { useGetAllProductsQuery } from "../api/dummyProductsApi";
 import SearchSuggestions from "../components/ui/SearchSuggestions";
 import MobileMenu from "./MobileMenu";
 import { openCart } from "../features/cart/cartSlice";
-import { logout } from "../features/auth/authSlice";
+import { logoutUser } from "../features/auth/authSlice";
 import ThemeToggle from "../components/ui/ThemeToggle";
 
 const StyledNavLink = ({ to, children }) => (
@@ -203,7 +203,7 @@ const Navbar = () => {
 
                   <div className="border-t border-gray-100 p-1 dark:border-slate-700">
                     <button
-                      onClick={() => dispatch(logout())}
+                      onClick={() => dispatch(logoutUser())}
                       className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       <SignOut size={18} /> Logout

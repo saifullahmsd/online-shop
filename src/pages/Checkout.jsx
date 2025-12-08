@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { clearCart } from "../features/cart/cartSlice";
 import { toast } from "react-hot-toast";
 import { CircleNotch, ShieldCheck } from "phosphor-react";
+import { useCreateOrderMutation } from "../api/dummyProductsApi";
 
 // Components
 import AddressForm from "../components/checkout/AddressForm";
@@ -15,11 +16,11 @@ const Checkout = () => {
   const navigate = useNavigate();
   const orderPlaced = useRef(false);
 
-  // Get Cart Data
   const { items, totalAmount } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
 
-  // If cart is empty, redirect to products
+  const [createOrder, { isLoading: isOrdering }] = useCreateOrderMutation();
+
   useEffect(() => {
     if (items.length === 0 && !orderPlaced.current) {
       navigate("/products");
@@ -38,56 +39,52 @@ const Checkout = () => {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = (e) => {
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    setIsProcessing(true);
 
-    // Calculations for the order object
+    //  Calculations
     const shipping = totalAmount > 50 ? 0 : 10;
     const tax = totalAmount * 0.05;
     const finalTotal = totalAmount + shipping + tax;
 
-    // 1. Create the Order Object
+    //  Prepare Order Object
     const newOrder = {
-      id: Math.floor(Math.random() * 100000), // Random ID
-      userId: user?.id,
-      date: new Date().toISOString(),
-      total: finalTotal.toFixed(2),
-      status: "Processing", // New orders start as processing
+      userId: user?.id || "guest",
+      userInfo: {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: `${formData.address}, ${formData.city}, ${formData.postalCode}`,
+      },
+      paymentMethod,
       products: items.map((item) => ({
         id: item.id,
         title: item.title,
         price: item.price,
         quantity: item.quantity,
-        total: (item.price * item.quantity).toFixed(2),
-        thumbnail: item.image, // Save image for display
+        thumbnail: item.image,
       })),
+      totalAmount: parseFloat(finalTotal.toFixed(2)),
     };
 
-    // SIMULATE API CALL
-    setTimeout(() => {
-      // 2. Save to LocalStorage (Our "Mock Database")
-      const existingOrders = JSON.parse(
-        localStorage.getItem("my_orders") || "[]"
-      );
-      localStorage.setItem(
-        "my_orders",
-        JSON.stringify([newOrder, ...existingOrders])
-      );
+    try {
+      //  Send to Firebase
+      await createOrder(newOrder).unwrap();
 
-      setIsProcessing(false);
+      //  Success Handling
       orderPlaced.current = true;
       dispatch(clearCart());
       toast.success("Order placed successfully!");
       navigate("/order-success");
-    }, 2000);
+    } catch (error) {
+      toast.error("Order Failed: " + error.message);
+    }
   };
 
   // Calculations for UI
@@ -176,10 +173,10 @@ const Checkout = () => {
 
               <button
                 type="submit"
-                disabled={isProcessing}
+                disabled={isOrdering}
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 font-bold text-white shadow-lg transition-transform hover:scale-[1.02] hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300 dark:disabled:bg-gray-600"
               >
-                {isProcessing ? (
+                {isOrdering ? (
                   <>
                     <CircleNotch className="animate-spin" size={24} />{" "}
                     Processing...

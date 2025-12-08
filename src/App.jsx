@@ -1,7 +1,10 @@
-import React, { Suspense, lazy, useEffect } from "react"; // <--- Import lazy & Suspense
+import React, { Suspense, lazy, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { fetchCartFromCloud, syncCartToCloud } from "./features/cart/cartSlice";
+import { fetchWishlistFromCloud } from "./features/wishlist/wishlistSlice";
 import ScrollToTop from "./components/shared/ScrollToTop";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
 import OfflineBanner from "./components/ui/OfflineBanner";
@@ -35,25 +38,40 @@ const AdminRoute = lazy(() => import("./components/auth/AdminRoute"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminProductForm = lazy(() =>
   import("./components/admin/AdminProductForm")
 );
 
-// Loading Fallback Component
 const PageLoader = () => (
   <div className="flex h-screen w-full items-center justify-center">
     <CircleNotch size={48} className="animate-spin text-primary" />
   </div>
 );
 
-// const BuggeyComponent = () => {
-//   throw new Error("I crashed");
-//   return <h1>this will never render</h1>;
-// };
 const App = () => {
+  const dispatch = useDispatch();
   const { mode } = useSelector((state) => state.theme);
+  const { user } = useSelector((state) => state.auth);
+  const { items } = useSelector((state) => state.cart);
 
-  // Update HTML class when theme changes
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchCartFromCloud());
+      dispatch(fetchWishlistFromCloud());
+    }
+  }, [user, dispatch]);
+
+  useEffect(() => {
+    if (user) {
+      const saveTimer = setTimeout(() => {
+        dispatch(syncCartToCloud());
+      }, 1000);
+      return () => clearTimeout(saveTimer);
+    }
+  }, [items, user, dispatch]);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (mode === "dark") {
@@ -65,7 +83,6 @@ const App = () => {
 
   return (
     <ErrorBoundary>
-      {/* <BuggeyComponent /> */}
       <OfflineBanner />
       <ScrollToTop />
 
@@ -103,6 +120,8 @@ const App = () => {
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="products/add" element={<AdminProductForm />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="users" element={<AdminUsers />} />
                 <Route
                   path="products/edit/:id"
                   element={<AdminProductForm />}

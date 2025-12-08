@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetProductByIdQuery } from "../../api/dummyProductsApi";
+import {
+  useGetProductByIdQuery,
+  useAddProductMutation,
+  useUpdateProductMutation,
+} from "../../api/dummyProductsApi";
 import { toast } from "react-hot-toast";
 import { FloppyDisk, ArrowLeft, CircleNotch } from "phosphor-react";
 import Skeleton from "../../components/shared/Skeleton";
@@ -13,6 +17,8 @@ const AdminProductForm = () => {
   const { data: product, isLoading } = useGetProductByIdQuery(id, {
     skip: !isEditMode,
   });
+  const [addProduct, { isLoading: isAdding }] = useAddProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -49,16 +55,24 @@ const AdminProductForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success(
-        isEditMode ? "Product updated (Mock)!" : "Product created (Mock)!"
-      );
+
+    try {
+      if (isEditMode) {
+        await updateProduct({ id, ...formData }).unwrap();
+        toast.success("Product updated successfully!");
+      } else {
+        await addProduct(formData).unwrap();
+        toast.success("Product created successfully!");
+      }
       navigate("/admin/products");
-    }, 1500);
+    } catch (error) {
+      toast.error("Failed to save: " + error.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (isEditMode && isLoading)

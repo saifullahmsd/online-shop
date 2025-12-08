@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { logout } from "../../features/auth/authSlice";
+import { logoutUser } from "../../features/auth/authSlice";
 import ThemeToggle from "../ui/ThemeToggle";
 import {
   SquaresFour,
@@ -44,7 +44,7 @@ const AdminLayout = () => {
           <Link to="/" className="text-xl font-bold tracking-wide text-white">
             Online<span className="text-primary">Admin</span>
           </Link>
-          {/* Close Button (Mobile Only) */}
+
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-gray-400"
@@ -90,7 +90,7 @@ const AdminLayout = () => {
 
         <div className="absolute bottom-0 w-full border-t border-gray-800 p-4">
           <button
-            onClick={() => dispatch(logout())}
+            onClick={() => dispatch(logoutUser())}
             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300"
           >
             <SignOut size={20} /> Logout

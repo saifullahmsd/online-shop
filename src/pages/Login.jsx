@@ -1,51 +1,38 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useLoginMutation } from "../features/auth/authApi";
-import { setCredentials } from "../features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../features/auth/authSlice";
 import { toast } from "react-hot-toast";
 import { CircleNotch, Lock, User } from "phosphor-react";
 import PageTransition from "../components/shared/PageTransition";
 
 const Login = () => {
-  const [username, setUsername] = useState("emilys");
-  const [password, setPassword] = useState("emilyspass");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const userData = await login({ username, password }).unwrap();
 
-      // Mock Role Logic
-      const userWithRole = {
-        ...userData,
-        role: username === "emilys" ? "admin" : "customer",
-      };
+    // Dispatch Firebase Login
+    const result = await dispatch(loginUser({ email, password }));
 
-      dispatch(
-        setCredentials({
-          user: userWithRole,
-          token: userData.token,
-        })
-      );
-
-      toast.success(`Welcome back, ${userData.firstName}!`);
-
-      if (userWithRole.role === "admin") {
+    if (loginUser.fulfilled.match(result)) {
+      toast.success(`Welcome back!`);
+      // Redirect based on role
+      if (result.payload.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
       }
-    } catch (err) {
-      toast.error(err.data?.message || "Login failed.");
+    } else {
+      toast.error(result.payload || "Login failed");
     }
   };
 
-  // Shared Input Class
   const inputClass =
     "w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-gray-900 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:placeholder-gray-400";
 
@@ -63,16 +50,15 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Input */}
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Username
+                Email Address
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className={inputClass}
                   required
                 />
@@ -83,7 +69,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password Input */}
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
@@ -103,13 +88,16 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="flex w-full items-center justify-center rounded-lg bg-primary py-3 font-bold text-white transition hover:bg-blue-700 disabled:bg-blue-300 dark:hover:bg-blue-600"
             >
-              {isLoading ? (
+              {loading ? (
                 <CircleNotch size={24} className="animate-spin" />
               ) : (
                 "Sign In"
@@ -126,13 +114,6 @@ const Login = () => {
               Sign up
             </Link>
           </p>
-
-          {/* Helper Note for Demo */}
-          <div className="mt-6 rounded bg-blue-50 p-4 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-300 dark:border dark:border-blue-900/50">
-            <p className="font-bold">Demo Credentials:</p>
-            <p>Username: emilys</p>
-            <p>Password: emilyspass</p>
-          </div>
         </div>
       </div>
     </PageTransition>

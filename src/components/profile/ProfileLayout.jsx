@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { logout } from "../../features/auth/authSlice";
+import { logoutUser } from "../../features/auth/authSlice";
 import { User, Package, SignOut } from "phosphor-react";
 
 const ProfileLayout = () => {
@@ -34,7 +34,7 @@ const ProfileLayout = () => {
               <div className="my-2 border-t border-gray-100 dark:border-slate-500"></div>
 
               <button
-                onClick={() => dispatch(logout())}
+                onClick={() => dispatch(logoutUser())}
                 className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-slate-700"
               >
                 <SignOut size={20} /> Logout

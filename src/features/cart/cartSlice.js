@@ -1,58 +1,72 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-hot-toast";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebaseConfig";
 
-// 1. Helper Function: Load from LocalStorage
-const loadCartFromStorage = () => {
-  try {
-    const serializedState = localStorage.getItem("cart");
-    if (serializedState === null) {
-      return { items: [], totalQuantity: 0, totalAmount: 0 };
-    }
-
-    // Parse karein
-    const parsedState = JSON.parse(serializedState);
-
-    // FIX: Check karein ke kya 'items' array mojood hai?
-    // Agar nahi hai, to default structure use karein
-    if (!parsedState || !Array.isArray(parsedState.items)) {
-      return { items: [], totalQuantity: 0, totalAmount: 0 };
-    }
-
-    return parsedState;
-  } catch (err) {
-    return { items: [], totalQuantity: 0, totalAmount: 0 };
-  }
-};
-
-// 2. Helper Function: Save to LocalStorage & Recalculate Totals
-const updateStorageAndTotals = (state) => {
-  // Calculate Totals
-  const { totalQuantity, totalAmount } = state.items.reduce(
-    (acc, item) => {
-      acc.totalQuantity += item.quantity;
-      acc.totalAmount += item.price * item.quantity;
-      return acc;
-    },
-    { totalQuantity: 0, totalAmount: 0 }
+// --- HELPERS ---
+const calculateTotals = (items) => {
+  const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalAmount = items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
   );
-
-  state.totalQuantity = totalQuantity;
-  state.totalAmount = parseFloat(totalAmount.toFixed(2)); // Fix decimal issues
-
-  // Save to LocalStorage
-  localStorage.setItem("cart", JSON.stringify(state));
+  return {
+    totalQuantity,
+    totalAmount: parseFloat(totalAmount.toFixed(2)),
+  };
 };
 
+// --- THUNKS (Database Actions) ---
+
+// 1. Save Cart to Cloud
+export const syncCartToCloud = createAsyncThunk(
+  "cart/sync",
+  async (_, { getState }) => {
+    const { user } = getState().auth;
+    const { items } = getState().cart;
+
+    // Only save if user is logged in
+    if (user && user.id) {
+      const userRef = doc(db, "users", user.id);
+
+      await setDoc(userRef, { cart: items }, { merge: true });
+    }
+  }
+);
+
+// 2. Load Cart from Cloud
+export const fetchCartFromCloud = createAsyncThunk(
+  "cart/fetch",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const { user } = getState().auth;
+      if (!user) return [];
+
+      const userRef = doc(db, "users", user.id);
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists() && docSnap.data().cart) {
+        return docSnap.data().cart;
+      }
+      return [];
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// --- SLICE ---
 const initialState = {
-  ...loadCartFromStorage(),
-  isCartOpen: false, // <--- NEW STATE
+  items: JSON.parse(localStorage.getItem("cart") || "[]"),
+  ...calculateTotals(JSON.parse(localStorage.getItem("cart") || "[]")),
+  isCartOpen: false,
+  status: "idle",
 };
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // --- NEW REDUCERS FOR DRAWER ---
     toggleCart: (state) => {
       state.isCartOpen = !state.isCartOpen;
     },
@@ -62,59 +76,65 @@ const cartSlice = createSlice({
     closeCart: (state) => {
       state.isCartOpen = false;
     },
+
     addToCart: (state, action) => {
       const newItem = action.payload;
-      const quantityToAdd = newItem.quantityToAdd || 1;
       const existingItem = state.items.find((item) => item.id === newItem.id);
 
       if (existingItem) {
-        existingItem.quantity++;
-        toast.success(`Increased quantity of ${newItem.title}`);
+        existingItem.quantity += newItem.quantityToAdd || 1;
+        toast.success(`Updated ${newItem.title} quantity`);
       } else {
-        // Add new item with quantity 1
         state.items.push({
           id: newItem.id,
           title: newItem.title,
           price: newItem.price,
-          image: newItem.thumbnail, // Standardize image key
-          quantity: quantityToAdd,
-          stock: newItem.stock || 100, // Fallback if API doesn't send stock
+          image: newItem.thumbnail,
+          quantity: newItem.quantityToAdd || 1,
+          stock: newItem.stock || 100,
         });
         toast.success(`${newItem.title} added to cart`);
       }
 
-      updateStorageAndTotals(state);
-      state.isCartOpen = true;
+      // Update Totals & Local Storage
+      const totals = calculateTotals(state.items);
+      state.totalQuantity = totals.totalQuantity;
+      state.totalAmount = totals.totalAmount;
+      localStorage.setItem("cart", JSON.stringify(state.items));
     },
 
     removeFromCart: (state, action) => {
-      const id = action.payload;
-      state.items = state.items.filter((item) => item.id !== id);
-      toast.error("Item removed from cart");
-      updateStorageAndTotals(state);
+      state.items = state.items.filter((item) => item.id !== action.payload);
+      const totals = calculateTotals(state.items);
+      state.totalQuantity = totals.totalQuantity;
+      state.totalAmount = totals.totalAmount;
+      localStorage.setItem("cart", JSON.stringify(state.items));
+      toast.error("Item removed");
     },
 
     increaseQuantity: (state, action) => {
-      const id = action.payload;
-      const item = state.items.find((item) => item.id === id);
+      const item = state.items.find((item) => item.id === action.payload);
       if (item) {
         item.quantity++;
-        updateStorageAndTotals(state);
+        const totals = calculateTotals(state.items);
+        state.totalQuantity = totals.totalQuantity;
+        state.totalAmount = totals.totalAmount;
+        localStorage.setItem("cart", JSON.stringify(state.items));
       }
     },
 
     decreaseQuantity: (state, action) => {
-      const id = action.payload;
-      const item = state.items.find((item) => item.id === id);
+      const item = state.items.find((item) => item.id === action.payload);
       if (item) {
-        if (item.quantity === 1) {
-          // If quantity is 1, remove it (optional: or just stop at 1)
-          state.items = state.items.filter((i) => i.id !== id);
-          toast.error("Item removed from cart");
-        } else {
+        if (item.quantity > 1) {
           item.quantity--;
+        } else {
+          state.items = state.items.filter((i) => i.id !== action.payload);
         }
-        updateStorageAndTotals(state);
+        const totals = calculateTotals(state.items);
+        state.totalQuantity = totals.totalQuantity;
+        state.totalAmount = totals.totalAmount;
+        localStorage.setItem("cart", JSON.stringify(state.items));
       }
     },
 
@@ -122,9 +142,21 @@ const cartSlice = createSlice({
       state.items = [];
       state.totalQuantity = 0;
       state.totalAmount = 0;
-      toast.success("Cart cleared");
       localStorage.removeItem("cart");
     },
+  },
+  extraReducers: (builder) => {
+    // When Cloud Fetch is Successful
+    builder.addCase(fetchCartFromCloud.fulfilled, (state, action) => {
+      if (action.payload && action.payload.length > 0) {
+        state.items = action.payload;
+        const totals = calculateTotals(state.items);
+        state.totalQuantity = totals.totalQuantity;
+        state.totalAmount = totals.totalAmount;
+        // Sync local storage too
+        localStorage.setItem("cart", JSON.stringify(state.items));
+      }
+    });
   },
 });
 

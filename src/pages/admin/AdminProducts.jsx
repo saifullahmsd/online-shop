@@ -1,5 +1,8 @@
 import React from "react";
-import { useGetAllProductsQuery } from "../../api/dummyProductsApi";
+import {
+  useGetAllProductsQuery,
+  useDeleteProductMutation,
+} from "../../api/dummyProductsApi";
 import { PencilSimple, Trash, Plus } from "phosphor-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -7,11 +10,17 @@ import Skeleton from "../../components/shared/Skeleton";
 
 const AdminProducts = () => {
   const { data, isLoading } = useGetAllProductsQuery({ limit: 100 });
+  const [deleteProduct] = useDeleteProductMutation();
   const navigate = useNavigate();
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      toast.success(`Product #${id} deleted (Mock)`);
+      try {
+        await deleteProduct(id).unwrap();
+        toast.success(`Product deleted`);
+      } catch (err) {
+        toast.error("Failed to delete");
+      }
     }
   };
 

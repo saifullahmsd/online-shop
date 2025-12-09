@@ -18,19 +18,14 @@ const Home = () => {
           description="Welcome to OnlineShop - the best place to buy everything you need"
         />
 
-        {/* 1. Hero Section */}
         <Hero />
 
-        {/* 2. Brand Strip */}
         <BrandsStrip />
 
-        {/* 3. Categories Grid */}
         <CategoriesSection />
 
-        {/* 4. Promotional Banner */}
         <DealsBanner />
 
-        {/* 5. Featured Products Grid */}
         <FeaturedProducts />
       </div>
     </PageTransition>

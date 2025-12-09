@@ -4,7 +4,7 @@ import { ArrowRight, ShoppingBag } from "phosphor-react";
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg dark:from-blue-900 dark:to-slate-900">
+    <section className="relative overflow-hidden rounded-2xl bg-linear-to-r from-blue-600 to-blue-800 text-white shadow-lg dark:from-blue-900 dark:to-slate-900">
       <div className="container mx-auto flex flex-col items-center px-6 py-16 text-center md:flex-row md:text-left">
         {/* Text Content */}
         <div className="z-10 w-full md:w-1/2">

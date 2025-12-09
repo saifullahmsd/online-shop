@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useGetCategoriesQuery } from "../../api/dummyProductsApi";
+import { useGetCategoriesQuery } from "../../api/productsApi";
 import Skeleton from "../shared/Skeleton";
 import { CaretRight } from "phosphor-react";
 

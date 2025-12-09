@@ -1,7 +1,5 @@
 import React from "react";
 
-// We use direct high-quality SVG/PNG URLs for a professional look.
-// In a real app, you would store these images in your src/assets folder.
 const brandLogos = [
   {
     name: "Apple",

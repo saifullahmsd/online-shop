@@ -8,14 +8,12 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-// --- 1. THUNKS (Async Actions) ---
-
 // REGISTER USER
 export const registerUser = createAsyncThunk(
   "auth/register",
   async ({ email, password, firstName, lastName }, { rejectWithValue }) => {
     try {
-      // 1. Create User in Firebase Auth
+      // Create User in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -23,25 +21,25 @@ export const registerUser = createAsyncThunk(
       );
       const user = userCredential.user;
 
-      // 2. Update "Display Name" in Auth Profile
+      // 2. Update "Display Name"
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`,
       });
 
-      // 3. Save Extra Info (Role, Name) to Firestore Database
+      // 3. Save Extra Info
       const userData = {
         id: user.uid,
         firstName,
         lastName,
         email,
-        role: "customer", // Default role
+        role: "customer",
         createdAt: new Date().toISOString(),
-        image: "https://ui-avatars.com/api/?name=" + firstName + "+" + lastName, // Auto-generate avatar
+        image: "https://ui-avatars.com/api/?name=" + firstName + "+" + lastName,
       };
 
       await setDoc(doc(db, "users", user.uid), userData);
 
-      return userData; // Send to Redux
+      return userData;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -53,7 +51,6 @@ export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      // 1. Sign in with Auth
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -61,14 +58,12 @@ export const loginUser = createAsyncThunk(
       );
       const user = userCredential.user;
 
-      // 2. Fetch User Data from Firestore (to get the Role)
       const docRef = doc(db, "users", user.uid);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         return docSnap.data();
       } else {
-        // Fallback if firestore record is missing
         return {
           id: user.uid,
           email: user.email,
@@ -78,6 +73,24 @@ export const loginUser = createAsyncThunk(
           image: user.photoURL || null,
         };
       }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// UPDATE USER PROFILE
+export const updateUserProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (updates, { getState, rejectWithValue }) => {
+    try {
+      const { user } = getState().auth;
+      if (!user) return rejectWithValue("No user logged in");
+
+      const userRef = doc(db, "users", user.id);
+      await setDoc(userRef, updates, { merge: true });
+
+      return { ...user, ...updates };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -134,6 +147,11 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // UPDATE PROFILE
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
       })
       // LOGOUT
       .addCase(logoutUser.fulfilled, (state) => {

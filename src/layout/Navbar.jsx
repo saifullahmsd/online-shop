@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ShoppingCart,
@@ -11,7 +11,7 @@ import {
   SignOut,
   Package,
 } from "phosphor-react";
-import { useGetAllProductsQuery } from "../api/dummyProductsApi";
+import { useGetAllProductsQuery } from "../api/productsApi";
 import SearchSuggestions from "../components/ui/SearchSuggestions";
 import MobileMenu from "./MobileMenu";
 import { openCart } from "../features/cart/cartSlice";
@@ -42,12 +42,22 @@ const Navbar = () => {
     (state) => state.cart || {}
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  const urlSearchQuery = searchParams.get("search") || "";
+
+  // --- Local State ---
+  const [searchTerm, setSearchTerm] = useState(urlSearchQuery);
   const [debouncedTerm, setDebouncedTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (searchTerm !== urlSearchQuery) {
+      setSearchTerm(urlSearchQuery);
+    }
+  }, [urlSearchQuery]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -82,7 +92,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* FIX: Ensure Light Mode is bg-white, Dark is bg-slate-900 */}
       <nav className="sticky top-0 z-50 w-full bg-white/90 border-b border-gray-100 shadow-sm backdrop-blur-md dark:bg-slate-900/90 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto flex items-center justify-between p-4">
           <Link to="/" className="text-2xl font-bold text-primary">

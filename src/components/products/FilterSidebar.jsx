@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetCategoriesQuery } from "../../api/dummyProductsApi";
+import { useGetCategoriesQuery } from "../../api/productsApi";
 import { X } from "phosphor-react";
 import Skeleton from "../shared/Skeleton";
 
@@ -26,11 +26,10 @@ const FilterSidebar = ({
       {/* SIDEBAR MAIN CONTAINER */}
       <aside
         className={`
-          /* --- MOBILE STYLES (Default) --- */
           fixed inset-y-0 left-0 z-50 w-64 transform bg-white p-6 shadow-xl transition-transform duration-300 ease-in-out
           dark:bg-slate-800 dark:shadow-none
           
-          /* --- DESKTOP STYLES (LG Screens) --- */
+          /*  DESKTOP STYLES  */
           lg:sticky lg:top-24 lg:z-0 lg:block lg:w-full lg:transform-none lg:shadow-none 
           lg:rounded-xl lg:border lg:border-gray-100 lg:dark:border-slate-700 lg:h-fit lg:max-h-[calc(100vh-120px)] 
           lg:overflow-y-auto 
@@ -124,11 +123,12 @@ const FilterSidebar = ({
           </h3>
           <input
             type="range"
+            name="minRating"
             min="0"
             max="5"
             step="0.5"
             value={filters.minRating}
-            onChange={() => {}}
+            onChange={onPriceChange}
             className="w-full accent-primary cursor-pointer h-2 bg-gray-200 rounded-lg appearance-none dark:bg-slate-700"
           />
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useGetCategoriesQuery } from "../api/dummyProductsApi";
+import { useGetCategoriesQuery } from "../api/productsApi";
 import {
   CaretRight,
   Tag,
@@ -12,7 +12,7 @@ import {
   Sunglasses,
 } from "phosphor-react";
 import Skeleton from "../components/shared/Skeleton";
-import PageTransition from "../components/shared/PageTransition"; // Add transition
+import PageTransition from "../components/shared/PageTransition";
 
 const getCategoryIcon = (category) => {
   if (category.includes("phone") || category.includes("laptop"))

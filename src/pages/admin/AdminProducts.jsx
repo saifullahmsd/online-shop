@@ -2,7 +2,7 @@ import React from "react";
 import {
   useGetAllProductsQuery,
   useDeleteProductMutation,
-} from "../../api/dummyProductsApi";
+} from "../../api/productsApi";
 import { PencilSimple, Trash, Plus } from "phosphor-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";

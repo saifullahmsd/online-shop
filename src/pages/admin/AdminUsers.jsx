@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetAllUsersQuery } from "../../api/dummyProductsApi";
+import { useGetAllUsersQuery } from "../../api/productsApi";
 import Skeleton from "../../components/shared/Skeleton";
 
 const AdminUsers = () => {

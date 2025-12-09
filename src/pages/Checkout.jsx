@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { clearCart } from "../features/cart/cartSlice";
 import { toast } from "react-hot-toast";
 import { CircleNotch, ShieldCheck } from "phosphor-react";
-import { useCreateOrderMutation } from "../api/dummyProductsApi";
+import { useCreateOrderMutation } from "../api/productsApi";
 
 // Components
 import AddressForm from "../components/checkout/AddressForm";

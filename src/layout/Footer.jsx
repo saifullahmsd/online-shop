@@ -9,9 +9,6 @@ import {
 
 const Footer = () => {
   return (
-    // FIX: Changed bg-slate-900 to bg-gray-100 (Light Mode)
-    // FIX: Changed text-white to text-gray-600 (Light Mode)
-    // Added dark: overrides for Dark Mode
     <footer className="bg-gray-100 p-8 text-gray-600 md:p-12 dark:bg-slate-900 dark:text-gray-400 border-t border-gray-200 dark:border-slate-800 transition-colors duration-300">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">

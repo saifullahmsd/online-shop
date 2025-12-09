@@ -25,7 +25,7 @@ const MobileMenu = ({ isOpen, setIsOpen }) => {
     e.preventDefault();
     if (mobileSearch.trim()) {
       setIsOpen(false);
-      navigate(`/products?search=${mobileSearch}`); //
+      navigate(`/products?search=${mobileSearch}`);
     }
   };
 
@@ -55,7 +55,7 @@ const MobileMenu = ({ isOpen, setIsOpen }) => {
           </button>
         </div>
 
-        {/* --- NEW: Mobile Search Bar --- */}
+        {/* mobile search bar  */}
         <div className="p-4 pb-0">
           <form onSubmit={handleMobileSearch} className="relative">
             <input

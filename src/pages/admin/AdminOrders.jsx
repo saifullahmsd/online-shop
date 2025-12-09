@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetAllOrdersQuery } from "../../api/dummyProductsApi";
+import { useGetAllOrdersQuery } from "../../api/productsApi";
 import { Clock, CheckCircle, Package } from "phosphor-react";
 import Skeleton from "../../components/shared/Skeleton";
 

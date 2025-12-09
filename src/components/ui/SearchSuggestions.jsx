@@ -21,7 +21,6 @@ const SearchSuggestions = ({
           Searching...
         </div>
       ) : suggestions && suggestions.length > 0 ? (
-        // Added 'custom-scrollbar' class here
         <ul className="max-h-80 overflow-y-auto custom-scrollbar">
           {suggestions.map((product) => (
             <li

@@ -23,7 +23,6 @@ const PromoModal = () => {
 
   const handleClose = () => {
     setIsOpen(false);
-    // Mark as seen so it doesn't popup again on refresh
     sessionStorage.setItem("hasSeenPromo", "true");
   };
 
@@ -34,8 +33,8 @@ const PromoModal = () => {
     // Simulate API call
     setTimeout(() => {
       setIsSubmitted(true);
-      // Don't close immediately, let them copy the code
-      sessionStorage.setItem("hasSeenPromo", "true"); // Also mark as seen
+
+      sessionStorage.setItem("hasSeenPromo", "true");
     }, 500);
   };
 
@@ -44,7 +43,6 @@ const PromoModal = () => {
     toast.success("Code copied to clipboard!");
   };
 
-  // If not open, render nothing
   if (!isOpen) return null;
 
   return (
@@ -57,7 +55,7 @@ const PromoModal = () => {
         {/* Modal Card */}
         <div
           className="relative mx-4 flex w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl transition-transform duration-300 md:h-[450px]"
-          onClick={(e) => e.stopPropagation()} // Prevent close when clicking inside
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button

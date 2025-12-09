@@ -14,7 +14,7 @@ const DataSeeder = () => {
       const data = await response.json();
       const products = data.products;
 
-      // 2. Upload to Firestore (Batch writes for speed)
+      // 2. Upload to Firestore
       const batch = writeBatch(db);
 
       products.forEach((product) => {
@@ -22,7 +22,7 @@ const DataSeeder = () => {
         const docRef = doc(db, "products", product.id.toString());
         batch.set(docRef, {
           ...product,
-          // Ensure numbers are numbers
+
           price: Number(product.price),
           stock: Number(product.stock),
           rating: Number(product.rating),

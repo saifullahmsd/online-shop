@@ -4,7 +4,7 @@ import {
   useGetProductByIdQuery,
   useAddProductMutation,
   useUpdateProductMutation,
-} from "../../api/dummyProductsApi";
+} from "../../api/productsApi";
 import { toast } from "react-hot-toast";
 import { FloppyDisk, ArrowLeft, CircleNotch } from "phosphor-react";
 import Skeleton from "../../components/shared/Skeleton";

@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { useGetUserOrdersQuery } from "../../api/dummyProductsApi";
+import { useGetUserOrdersQuery } from "../../api/productsApi";
 import { Package, CheckCircle, Clock } from "phosphor-react";
 import Skeleton from "../../components/shared/Skeleton";
 

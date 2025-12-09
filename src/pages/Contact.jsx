@@ -29,7 +29,7 @@ const Contact = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-          {/* LEFT COLUMN: Contact Info & Form */}
+          {/* LEFT COLUMN */}
           <div className="space-y-8">
             {/* Info Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -86,7 +86,7 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Map & FAQ */}
+          {/* RIGHT COLUMN */}
           <div className="space-y-8">
             {/* Google Map Embed */}
             <div className="h-64 overflow-hidden rounded-2xl shadow-sm bg-gray-200 dark:bg-slate-800">

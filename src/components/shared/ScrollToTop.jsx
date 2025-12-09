@@ -9,7 +9,7 @@ const ScrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "instant", // Instant jump is better for route changes than smooth
+      behavior: "instant",
     });
   }, [pathname]);
 

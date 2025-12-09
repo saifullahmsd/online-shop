@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useGetAllProductsQuery } from "../../api/dummyProductsApi";
+import { useGetAllProductsQuery } from "../../api/productsApi";
 import ProductCard from "../shared/ProductCard";
 import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 

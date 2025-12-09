@@ -17,11 +17,7 @@ const MainLayout = () => {
       <PromoModal />
       {/* Main Content Area */}
 
-      <main
-        id="main-content"
-        className="flex-grow focus:outline-none"
-        tabIndex="-1"
-      >
+      <main id="main-content" className="grow focus:outline-none" tabIndex="-1">
         <div className="container mx-auto px-4 py-6 md:py-8">
           <Outlet />
         </div>

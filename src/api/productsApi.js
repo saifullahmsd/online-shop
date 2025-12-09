@@ -13,8 +13,8 @@ import {
   orderBy,
 } from "firebase/firestore";
 
-export const dummyProductsApi = createApi({
-  reducerPath: "dummyProductsApi",
+export const productsApi = createApi({
+  reducerPath: "productsApi",
   baseQuery: fakeBaseQuery(),
   tagTypes: ["Products", "UserOrders"],
   endpoints: (builder) => ({
@@ -36,20 +36,25 @@ export const dummyProductsApi = createApi({
       },
     }),
 
+    // 2. Get All Products
     getAllProducts: builder.query({
       async queryFn(params) {
         try {
           const {
             skip = 0,
-            limit = 12,
+            limit = 100,
             search,
             category,
             sortBy,
             order,
+            minPrice,
+            maxPrice,
+            minRating,
           } = params || {};
 
           let q = collection(db, "products");
 
+          // 1. Database Level Filtering
           if (category && category !== "all") {
             q = query(q, where("category", "==", category));
           }
@@ -60,15 +65,30 @@ export const dummyProductsApi = createApi({
             ...doc.data(),
           }));
 
-          if (search) {
-            const lowerSearch = search.toLowerCase();
-            products = products.filter(
-              (p) =>
-                p.title.toLowerCase().includes(lowerSearch) ||
-                p.description.toLowerCase().includes(lowerSearch)
-            );
-          }
+          // 2. JS Level Filtering (Search, Price, Rating)
 
+          products = products.filter((p) => {
+            // Search
+            if (search) {
+              const lowerSearch = search.toLowerCase();
+              const matchesSearch =
+                p.title.toLowerCase().includes(lowerSearch) ||
+                p.description.toLowerCase().includes(lowerSearch);
+              if (!matchesSearch) return false;
+            }
+
+            // Price Range
+            const price = parseFloat(p.price);
+            if (minPrice && price < parseFloat(minPrice)) return false;
+            if (maxPrice && price > parseFloat(maxPrice)) return false;
+
+            // Rating
+            if (minRating && p.rating < parseFloat(minRating)) return false;
+
+            return true;
+          });
+
+          // 3. Sorting
           if (sortBy) {
             products.sort((a, b) => {
               if (order === "asc") return a[sortBy] > b[sortBy] ? 1 : -1;
@@ -76,12 +96,12 @@ export const dummyProductsApi = createApi({
             });
           }
 
+          // 4. Pagination Metadata
           const total = products.length;
-          const paginatedProducts = products.slice(skip, skip + limit);
 
           return {
             data: {
-              products: paginatedProducts,
+              products,
               total,
               skip,
               limit,
@@ -233,6 +253,28 @@ export const dummyProductsApi = createApi({
       },
       invalidatesTags: ["Products"],
     }),
+
+    addReview: builder.mutation({
+      async queryFn({ productId, newReview }) {
+        try {
+          const { doc, updateDoc, arrayUnion } = await import(
+            "firebase/firestore"
+          );
+          const productRef = doc(db, "products", productId.toString());
+
+          await updateDoc(productRef, {
+            reviews: arrayUnion(newReview),
+          });
+
+          return { data: "Review Added" };
+        } catch (error) {
+          return { error: error.message };
+        }
+      },
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Products", id: productId },
+      ],
+    }),
   }),
 });
 
@@ -247,4 +289,5 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useCreateOrderMutation,
-} = dummyProductsApi;
+  useAddReviewMutation,
+} = productsApi;

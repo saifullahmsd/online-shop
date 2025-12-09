@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../features/cart/cartSlice";
 import {
   useGetProductByIdQuery,
   useGetAllProductsQuery,
-} from "../api/dummyProductsApi";
+  useAddReviewMutation,
+} from "../api/productsApi";
 import {
   Star,
   Truck,
@@ -23,6 +24,7 @@ import ImageGallery from "../components/product-detail/ImageGallery";
 import Reviews from "../components/product-detail/Reviews";
 import ReviewForm from "../components/product-detail/ReviewForm";
 import ProductCard from "../components/shared/ProductCard";
+import { toggleWishlist } from "../features/wishlist/wishlistSlice";
 import SEO from "../components/shared/SEO";
 import PageTransition from "../components/shared/PageTransition";
 import ProductDetailSkeleton from "../components/skeletons/ProductDetailSkeleton";
@@ -30,45 +32,23 @@ import ProductDetailSkeleton from "../components/skeletons/ProductDetailSkeleton
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-
-  // 1. Fetch Product
-  const { data: product, isLoading, isError } = useGetProductByIdQuery(id);
-
-  // 2. Local States
   const [quantity, setQuantity] = useState(1);
-  const [allReviews, setAllReviews] = useState([]);
-  const [avgRating, setAvgRating] = useState(0);
 
-  // 3. Effect: Combine API Data + LocalStorage Data
-  useEffect(() => {
-    if (product) {
-      const savedReviews = JSON.parse(
-        localStorage.getItem("product_reviews") || "[]"
-      );
-      const localReviewsForThisProduct = savedReviews.filter(
-        (r) => r.productId === parseInt(id)
-      );
-      const apiReviews = product.reviews || [];
-      const combined = [...localReviewsForThisProduct, ...apiReviews];
-
-      setAllReviews(combined);
-
-      if (combined.length > 0) {
-        const total = combined.reduce((acc, r) => acc + r.rating, 0);
-        setAvgRating((total / combined.length).toFixed(1));
-      } else {
-        setAvgRating(product.rating);
-      }
-    }
-  }, [product, id]);
-
-  // 4. Fetch Related Products
+  const { data: product, isLoading, isError } = useGetProductByIdQuery(id);
+  const [addReview] = useAddReviewMutation();
   const { data: relatedData } = useGetAllProductsQuery(
     { category: product?.category, limit: 4 },
     { skip: !product }
   );
 
-  // Handlers
+  const isWishlisted = useSelector((state) =>
+    state.wishlist.items.some((item) => item.id === product?.id)
+  );
+
+  const handleWishlist = () => {
+    dispatch(toggleWishlist(product));
+  };
+
   const handleQuantityChange = (type) => {
     if (type === "dec" && quantity > 1) setQuantity((prev) => prev - 1);
     if (type === "inc" && quantity < (product?.stock || 10))
@@ -79,20 +59,8 @@ const ProductDetail = () => {
     dispatch(addToCart({ ...product, quantityToAdd: quantity }));
   };
 
-  const handleReviewSubmit = (newReview) => {
-    const updatedReviews = [newReview, ...allReviews];
-    setAllReviews(updatedReviews);
-
-    const total = updatedReviews.reduce((acc, r) => acc + r.rating, 0);
-    setAvgRating((total / updatedReviews.length).toFixed(1));
-
-    const allSavedReviews = JSON.parse(
-      localStorage.getItem("product_reviews") || "[]"
-    );
-    localStorage.setItem(
-      "product_reviews",
-      JSON.stringify([newReview, ...allSavedReviews])
-    );
+  const handleReviewSubmit = async (newReview) => {
+    await addReview({ productId: id, newReview }).unwrap();
   };
 
   if (isLoading) return <ProductDetailSkeleton />;
@@ -100,6 +68,14 @@ const ProductDetail = () => {
     return (
       <div className="p-10 text-center text-red-500">Product not found</div>
     );
+
+  const reviews = product.reviews || [];
+  const avgRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+        ).toFixed(1)
+      : product.rating;
 
   const originalPrice = product.price / (1 - product.discountPercentage / 100);
   const stockColor =
@@ -152,7 +128,7 @@ const ProductDetail = () => {
                 </span>
               </div>
               <span className="text-sm text-gray-400">
-                | {allReviews.length} Reviews
+                | {reviews.length} Reviews
               </span>
               <span className={`text-sm font-medium ml-4 ${stockColor}`}>
                 {product.stock > 0
@@ -187,9 +163,9 @@ const ProductDetail = () => {
               {product.description}
             </p>
 
+            {/* Add to Cart Section */}
             <div className="fixed bottom-0 inset-x-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800 md:static md:mb-8 md:border-0 md:bg-transparent md:p-0 md:shadow-none">
               <div className="flex flex-col gap-4 sm:flex-row container mx-auto md:w-auto md:mx-0">
-                {/* Quantity */}
                 <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 dark:bg-slate-800 dark:border-slate-700 md:w-auto">
                   <button
                     onClick={() => handleQuantityChange("dec")}
@@ -208,7 +184,6 @@ const ProductDetail = () => {
                   </button>
                 </div>
 
-                {/* Add Button */}
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleAddToCart}
@@ -219,8 +194,15 @@ const ProductDetail = () => {
                   {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                 </motion.button>
 
-                <button className="hidden rounded-lg border border-gray-200 p-3 text-gray-400 hover:text-red-500 dark:border-slate-700 dark:text-gray-300 dark:hover:text-red-500 sm:block">
-                  <Heart size={24} weight="bold" />
+                <button
+                  onClick={handleWishlist}
+                  className={`hidden rounded-lg border p-3 transition-colors sm:block ${
+                    isWishlisted
+                      ? "border-red-200 bg-red-50 text-red-500 dark:bg-red-900/20 dark:border-red-900"
+                      : "border-gray-200 text-gray-400 hover:text-red-500 dark:border-slate-700 dark:text-gray-300 dark:hover:text-red-500"
+                  }`}
+                >
+                  <Heart size={24} weight={isWishlisted ? "fill" : "bold"} />
                 </button>
               </div>
             </div>
@@ -248,7 +230,7 @@ const ProductDetail = () => {
         {/* REVIEWS & FORM */}
         <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <Reviews reviews={allReviews} />
+            <Reviews reviews={reviews} />
           </div>
           <div>
             <ReviewForm

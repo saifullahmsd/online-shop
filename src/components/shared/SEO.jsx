@@ -2,12 +2,11 @@ import React from "react";
 import { Helmet } from "react-helmet";
 
 const SEO = ({ title, description, keywords, image, url }) => {
-  const siteName = "OnlineShop"; // Renamed
+  const siteName = "OnlineShop";
   const siteUrl = window.location.origin;
 
   const defaultDescription = "Shop the best products at unbeatable prices.";
 
-  // Use a reliable placeholder service (DummyJSON image links break often)
   const defaultImage =
     "https://placehold.co/1200x630/2563EB/FFFFFF.png?text=OnlineShop";
 

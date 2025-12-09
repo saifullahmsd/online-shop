@@ -5,7 +5,6 @@ import PageTransition from "../components/shared/PageTransition";
 
 const OrderSuccess = () => {
   const orderId = Math.floor(Math.random() * 1000000);
-  // Generate random Order ID
 
   return (
     <PageTransition>

@@ -10,13 +10,18 @@ import {
   Heart,
   SignOut,
   Package,
+  SquaresFour,
 } from "phosphor-react";
 import { useGetAllProductsQuery } from "../api/productsApi";
 import SearchSuggestions from "../components/ui/SearchSuggestions";
 import MobileMenu from "./MobileMenu";
 import { openCart } from "../features/cart/cartSlice";
-import { logoutUser } from "../features/auth/authSlice";
+
 import ThemeToggle from "../components/ui/ThemeToggle";
+import BrandLogo from "../components/ui/BrandLogo";
+import useAuth from "../hooks/useAuth";
+import useDebounce from "../hooks/useDebounce";
+import { DEBOUNCE } from "../utils/constants";
 
 const StyledNavLink = ({ to, children }) => (
   <NavLink
@@ -37,17 +42,15 @@ const StyledNavLink = ({ to, children }) => (
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { items = [], totalQuantity } = useSelector(
     (state) => state.cart || {}
   );
-
+  const { user, isAuthenticated, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get("search") || "";
 
   // --- Local State ---
   const [searchTerm, setSearchTerm] = useState(urlSearchQuery);
-  const [debouncedTerm, setDebouncedTerm] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
@@ -59,17 +62,15 @@ const Navbar = () => {
     }
   }, [urlSearchQuery]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedTerm(searchTerm);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+  const debouncedTerm = useDebounce(searchTerm, DEBOUNCE.SEARCH);
 
   const shouldFetch = debouncedTerm.length > 2;
   const { data, isLoading } = useGetAllProductsQuery(
     { search: debouncedTerm, limit: 5 },
-    { skip: !shouldFetch }
+    {
+      skip: !shouldFetch,
+      refetchOnMountOrArgChange: 30,
+    }
   );
 
   const handleSearchSubmit = (e) => {
@@ -94,8 +95,17 @@ const Navbar = () => {
     <>
       <nav className="sticky top-0 z-50 w-full bg-white/90 border-b border-gray-100 shadow-sm backdrop-blur-md dark:bg-slate-900/90 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto flex items-center justify-between p-4">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            OnlineShop
+          {/* Brand logo  */}
+          <Link
+            to="/"
+            className="flex items-center gap-1 text-primary transition-opacity hover:opacity-80"
+            aria-label="OnlineShop Home"
+          >
+            <BrandLogo className="h-8 w-8 md:h-9 md:w-9" />
+
+            <span className="hidden text-xl font-extrabold tracking-tight md:block lg:text-2xl">
+              OnlineShop
+            </span>
           </Link>
 
           <div className="hidden items-center space-x-6 md:flex">
@@ -196,6 +206,14 @@ const Navbar = () => {
                   </div>
 
                   <div className="p-1">
+                    {user?.role === "admin" && (
+                      <Link
+                        to="/admin"
+                        className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-primary hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      >
+                        <SquaresFour size={18} weight="fill" /> Dashboard
+                      </Link>
+                    )}
                     <Link
                       to="/profile"
                       className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-primary dark:text-gray-300 dark:hover:bg-slate-700"
@@ -212,7 +230,7 @@ const Navbar = () => {
 
                   <div className="border-t border-gray-100 p-1 dark:border-slate-700">
                     <button
-                      onClick={() => dispatch(logoutUser())}
+                      onClick={logout}
                       className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       <SignOut size={18} /> Logout

@@ -1,6 +1,5 @@
 import React from "react";
 import { CurrencyDollar, ShoppingCart, Users, TrendUp } from "phosphor-react";
-import DataSeeder from "../../components/admin/DataSeeder";
 
 const StatCard = ({ title, value, icon: Icon, color, trend }) => (
   <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:bg-slate-800 dark:border-slate-700">
@@ -31,7 +30,6 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
         Dashboard Overview
-        <DataSeeder />
       </h1>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">

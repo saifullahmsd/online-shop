@@ -5,6 +5,7 @@ import { clearCart } from "../features/cart/cartSlice";
 import { toast } from "react-hot-toast";
 import { CircleNotch, ShieldCheck } from "phosphor-react";
 import { useCreateOrderMutation } from "../api/productsApi";
+import { SHIPPING, TAX_RATE } from "../utils/constants";
 
 // Components
 import AddressForm from "../components/checkout/AddressForm";
@@ -49,8 +50,8 @@ const Checkout = () => {
     e.preventDefault();
 
     //  Calculations
-    const shipping = totalAmount > 50 ? 0 : 10;
-    const tax = totalAmount * 0.05;
+    const shipping = totalAmount > SHIPPING.FREE_THRESHOLD ? 0 : SHIPPING.COST;
+    const tax = totalAmount * TAX_RATE;
     const finalTotal = totalAmount + shipping + tax;
 
     //  Prepare Order Object

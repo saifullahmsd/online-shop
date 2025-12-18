@@ -7,7 +7,7 @@ import ProductCardSkeleton from "../skeletons/ProductCardSkeleton";
 const FeaturedProducts = () => {
   const { data, isLoading, isError } = useGetAllProductsQuery({ limit: 8 });
 
-  if (isError) return null; // Gracefully fail if API errors
+  if (isError) return null;
 
   return (
     <section className="py-12">
@@ -23,8 +23,12 @@ const FeaturedProducts = () => {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {isLoading
           ? [...Array(8)].map((_, i) => <ProductCardSkeleton key={i} />)
-          : data?.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          : data?.products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                priority={index < 4}
+              />
             ))}
       </div>
 

@@ -11,11 +11,15 @@ import ErrorMessage from "../components/ui/ErrorMessage";
 import SEO from "../components/shared/SEO";
 import PageTransition from "../components/shared/PageTransition";
 import ProductCardSkeleton from "../components/skeletons/ProductCardSkeleton";
+import useAutoRetry from "../hooks/useAutoRetry";
+import useDebounce from "../hooks/useDebounce";
+import { DEBOUNCE, PAGINATION } from "../utils/constants";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [displayLimit, setDisplayLimit] = useState(12);
+  const [displayLimit, setDisplayLimit] = useState(PAGINATION.ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerTarget = useRef(null);
 
   // Initialize State
@@ -30,8 +34,6 @@ const Products = () => {
 
   const [filters, setFilters] = useState(initialFilters);
 
-  const [debouncedSearch, setDebouncedSearch] = useState(filters.search);
-
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
 
@@ -45,12 +47,9 @@ const Products = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), 500);
-    return () => clearTimeout(timer);
-  }, [filters.search]);
+  const debouncedSearch = useDebounce(filters.search, DEBOUNCE.SEARCH);
 
-  // 3. Sync State -> URL (FIXED)
+  //  Sync State
   useEffect(() => {
     const params = {};
     if (filters.search) params.search = filters.search;
@@ -81,7 +80,7 @@ const Products = () => {
     sortBy: sortKey,
     order: sortOrder,
   });
-
+  useAutoRetry(isError, refetch);
   const allProducts = data?.products || [];
 
   // Pagination
@@ -91,11 +90,15 @@ const Products = () => {
   const handleObserver = useCallback(
     (entries) => {
       const [target] = entries;
-      if (target.isIntersecting && hasMore) {
-        setTimeout(() => setDisplayLimit((prev) => prev + 12), 500);
+      if (target.isIntersecting && hasMore && !isLoadingMore) {
+        setIsLoadingMore(true);
+        setTimeout(() => {
+          setDisplayLimit((prev) => prev + PAGINATION.ITEMS_PER_PAGE);
+          setIsLoadingMore(false);
+        }, 500);
       }
     },
-    [hasMore]
+    [hasMore, isLoadingMore]
   );
 
   useEffect(() => {

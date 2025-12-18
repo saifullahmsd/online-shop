@@ -17,12 +17,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    /
     const result = await dispatch(loginUser({ email, password }));
 
     if (loginUser.fulfilled.match(result)) {
       toast.success(`Welcome back!`);
-    
+
       if (result.payload.role === "admin") {
         navigate("/admin");
       } else {

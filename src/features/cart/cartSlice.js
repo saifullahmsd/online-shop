@@ -16,9 +16,9 @@ const calculateTotals = (items) => {
   };
 };
 
-// --- THUNKS (Database Actions) ---
+//  THUNKS (Database Actions)
 
-// 1. Save Cart to Cloud
+// Save Cart to Cloud
 export const syncCartToCloud = createAsyncThunk(
   "cart/sync",
   async (_, { getState }) => {
@@ -34,7 +34,7 @@ export const syncCartToCloud = createAsyncThunk(
   }
 );
 
-// 2. Load Cart from Cloud
+// Load Cart from Cloud
 export const fetchCartFromCloud = createAsyncThunk(
   "cart/fetch",
   async (_, { getState, rejectWithValue }) => {
@@ -96,7 +96,6 @@ const cartSlice = createSlice({
         toast.success(`${newItem.title} added to cart`);
       }
 
-      // Update Totals & Local Storage
       const totals = calculateTotals(state.items);
       state.totalQuantity = totals.totalQuantity;
       state.totalAmount = totals.totalAmount;
@@ -146,17 +145,28 @@ const cartSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // When Cloud Fetch is Successful
-    builder.addCase(fetchCartFromCloud.fulfilled, (state, action) => {
-      if (action.payload && action.payload.length > 0) {
-        state.items = action.payload;
-        const totals = calculateTotals(state.items);
-        state.totalQuantity = totals.totalQuantity;
-        state.totalAmount = totals.totalAmount;
-        // Sync local storage too
-        localStorage.setItem("cart", JSON.stringify(state.items));
-      }
-    });
+    builder
+
+      .addCase(fetchCartFromCloud.pending, (state) => {
+        state.status = "loading";
+      })
+
+      .addCase(fetchCartFromCloud.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        if (action.payload && action.payload.length > 0) {
+          state.items = action.payload;
+
+          const totals = calculateTotals(state.items);
+          state.totalQuantity = totals.totalQuantity;
+          state.totalAmount = totals.totalAmount;
+
+          localStorage.setItem("cart", JSON.stringify(state.items));
+        }
+      })
+
+      .addCase(fetchCartFromCloud.rejected, (state) => {
+        state.status = "failed";
+      });
   },
 });
 

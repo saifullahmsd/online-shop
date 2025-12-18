@@ -1,8 +1,7 @@
 import React, { Suspense, lazy, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { useDispatch } from "react-redux";
 import { fetchCartFromCloud, syncCartToCloud } from "./features/cart/cartSlice";
 import { fetchWishlistFromCloud } from "./features/wishlist/wishlistSlice";
 import ScrollToTop from "./components/shared/ScrollToTop";
@@ -10,9 +9,9 @@ import ErrorBoundary from "./components/shared/ErrorBoundary";
 import OfflineBanner from "./components/ui/OfflineBanner";
 import MainLayout from "./layout/MainLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-
-// Import Loading Spinner for Suspense
 import { CircleNotch } from "phosphor-react";
+import useDebounce from "./hooks/useDebounce";
+import { DEBOUNCE } from "./utils/constants";
 
 // LAZY LOAD PAGES
 const Home = lazy(() => import("./pages/Home"));
@@ -33,7 +32,7 @@ const ProfileLayout = lazy(() => import("./components/profile/ProfileLayout"));
 const UserProfile = lazy(() => import("./pages/profile/UserProfile"));
 const UserOrders = lazy(() => import("./pages/profile/UserOrders"));
 
-// admin pages
+// Admin Pages
 const AdminRoute = lazy(() => import("./components/auth/AdminRoute"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -56,22 +55,30 @@ const App = () => {
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
 
+  // Initial Load: Fetch Cloud Data on Login
   useEffect(() => {
     if (user) {
       dispatch(fetchCartFromCloud());
       dispatch(fetchWishlistFromCloud());
     }
   }, [user, dispatch]);
+  const debouncedItems = useDebounce(items, DEBOUNCE.CART_SYNC);
 
   useEffect(() => {
-    if (user) {
-      const saveTimer = setTimeout(() => {
-        dispatch(syncCartToCloud());
-      }, 1000);
-      return () => clearTimeout(saveTimer);
-    }
-  }, [items, user, dispatch]);
+    if (!user) return;
 
+    dispatch(syncCartToCloud());
+  }, [debouncedItems, user, dispatch]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (items.length > 0) dispatch(syncCartToCloud());
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [items, dispatch]);
+
+  //  Theme Handler
   useEffect(() => {
     const root = window.document.documentElement;
     if (mode === "dark") {
@@ -85,9 +92,8 @@ const App = () => {
     <ErrorBoundary>
       <OfflineBanner />
       <ScrollToTop />
-
       <Toaster position="bottom-right" />
-      {/* Wrap Routes in Suspense */}
+
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<MainLayout />}>
@@ -98,34 +104,31 @@ const App = () => {
             <Route path="cart" element={<Cart />} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="contact" element={<Contact />} />
-
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
 
-            {/* protected route  */}
+            {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="checkout" element={<Checkout />} />
               <Route path="order-success" element={<OrderSuccess />} />
-
-              {/* profile route  */}
               <Route path="profile" element={<ProfileLayout />}>
                 <Route index element={<UserProfile />} />
                 <Route path="orders" element={<UserOrders />} />
               </Route>
             </Route>
 
-            {/* admin route  */}
+            {/* Admin Routes */}
             <Route element={<AdminRoute />}>
               <Route path="admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="products/add" element={<AdminProductForm />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="users" element={<AdminUsers />} />
                 <Route
                   path="products/edit/:id"
                   element={<AdminProductForm />}
                 />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="users" element={<AdminUsers />} />
               </Route>
             </Route>
 

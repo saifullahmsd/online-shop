@@ -36,7 +36,7 @@ export const productsApi = createApi({
       },
     }),
 
-    // 2. Get All Products
+    //  Get All Products
     getAllProducts: builder.query({
       async queryFn(params) {
         try {
@@ -54,7 +54,7 @@ export const productsApi = createApi({
 
           let q = collection(db, "products");
 
-          // 1. Database Level Filtering
+          //  Database Level Filtering
           if (category && category !== "all") {
             q = query(q, where("category", "==", category));
           }
@@ -65,8 +65,7 @@ export const productsApi = createApi({
             ...doc.data(),
           }));
 
-          // 2. JS Level Filtering (Search, Price, Rating)
-
+          //  JS Level Filtering
           products = products.filter((p) => {
             // Search
             if (search) {
@@ -88,7 +87,7 @@ export const productsApi = createApi({
             return true;
           });
 
-          // 3. Sorting
+          //  Sorting
           if (sortBy) {
             products.sort((a, b) => {
               if (order === "asc") return a[sortBy] > b[sortBy] ? 1 : -1;
@@ -96,12 +95,13 @@ export const productsApi = createApi({
             });
           }
 
-          // 4. Pagination Metadata
+          //  Pagination Metadata
           const total = products.length;
+          const paginatedProducts = products.slice(skip, skip + limit);
 
           return {
             data: {
-              products,
+              products: paginatedProducts,
               total,
               skip,
               limit,
@@ -132,7 +132,7 @@ export const productsApi = createApi({
       providesTags: (result, error, id) => [{ type: "Products", id }],
     }),
 
-    // 4. Get User Orders
+    //  Get User Orders
     getUserOrders: builder.query({
       async queryFn(userId) {
         try {
@@ -209,7 +209,7 @@ export const productsApi = createApi({
       invalidatesTags: ["UserOrders"],
     }),
 
-    // 6. Add, Update, Delete Product Mutations
+    //  Add, Update, Delete Product Mutations
     addProduct: builder.mutation({
       async queryFn(newProduct) {
         try {

@@ -10,10 +10,30 @@ import {
   decreaseQuantity,
 } from "../../features/cart/cartSlice";
 
+// --- INTERNAL COMPONENT: Cart Skeleton ---
+const CartSkeleton = () => (
+  <div className="flex animate-pulse gap-4">
+    <div className="h-20 w-20 flex-shrink-0 rounded-md bg-gray-200 dark:bg-slate-700" />
+    <div className="flex flex-1 flex-col justify-between py-1">
+      <div className="space-y-2">
+        <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-slate-700" />
+        <div className="h-3 w-1/4 rounded bg-gray-200 dark:bg-slate-700" />
+      </div>
+      <div className="flex justify-between">
+        <div className="h-8 w-20 rounded bg-gray-200 dark:bg-slate-700" />
+        <div className="h-8 w-8 rounded bg-gray-200 dark:bg-slate-700" />
+      </div>
+    </div>
+  </div>
+);
+
 const CartDrawer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items, totalAmount, isCartOpen } = useSelector((state) => state.cart);
+  // 1. Get 'status' from Redux
+  const { items, totalAmount, isCartOpen, status } = useSelector(
+    (state) => state.cart
+  );
 
   useEffect(() => {
     if (isCartOpen) {
@@ -40,7 +60,7 @@ const CartDrawer = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => dispatch(closeCart())}
-            className="fixed inset-0 z-[99] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-99 bg-black/60 backdrop-blur-sm"
           />
 
           <motion.div
@@ -65,7 +85,15 @@ const CartDrawer = () => {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6">
-                {items.length === 0 ? (
+                {/*  LOADING STATE: Show Skeletons */}
+                {status === "loading" ? (
+                  <div className="space-y-6">
+                    {[1, 2, 3].map((i) => (
+                      <CartSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : items.length === 0 ? (
+                  /* EMPTY STATE */
                   <div className="flex h-full flex-col items-center justify-center space-y-4 text-gray-500">
                     <ShoppingBag size={64} className="text-gray-300" />
                     <p>Your cart is empty</p>
@@ -77,13 +105,10 @@ const CartDrawer = () => {
                     </button>
                   </div>
                 ) : (
+                  /* DATA STATE */
                   <div className="space-y-6">
                     {items.map((item) => (
-                      <motion.div
-                        layout //
-                        key={item.id}
-                        className="flex gap-4"
-                      >
+                      <motion.div layout key={item.id} className="flex gap-4">
                         {/* Image */}
                         <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 bg-gray-50">
                           <img
@@ -138,7 +163,7 @@ const CartDrawer = () => {
                 )}
               </div>
 
-              {items.length > 0 && (
+              {items.length > 0 && status !== "loading" && (
                 <div className="border-t border-gray-100 bg-gray-50 p-6 dark:bg-slate-800 dark:border-slate-700">
                   <div className="mb-4 flex justify-between text-lg font-bold">
                     <span>Subtotal</span>

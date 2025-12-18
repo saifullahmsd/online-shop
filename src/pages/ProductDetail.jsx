@@ -16,6 +16,7 @@ import {
   Plus,
   ShoppingCart,
   Heart,
+  SmileySad,
 } from "phosphor-react";
 import { motion } from "framer-motion";
 
@@ -28,13 +29,22 @@ import { toggleWishlist } from "../features/wishlist/wishlistSlice";
 import SEO from "../components/shared/SEO";
 import PageTransition from "../components/shared/PageTransition";
 import ProductDetailSkeleton from "../components/skeletons/ProductDetailSkeleton";
+import ErrorMessage from "../components/ui/ErrorMessage";
+import useAutoRetry from "../hooks/useAutoRetry";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
 
-  const { data: product, isLoading, isError } = useGetProductByIdQuery(id);
+  const {
+    data: product,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetProductByIdQuery(id);
+  useAutoRetry(isError, refetch);
+
   const [addReview] = useAddReviewMutation();
   const { data: relatedData } = useGetAllProductsQuery(
     { category: product?.category, limit: 4 },
@@ -63,12 +73,46 @@ const ProductDetail = () => {
     await addReview({ productId: id, newReview }).unwrap();
   };
 
+  // LOADING STATE
   if (isLoading) return <ProductDetailSkeleton />;
-  if (isError || !product)
-    return (
-      <div className="p-10 text-center text-red-500">Product not found</div>
-    );
 
+  //  ERROR STATE
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-20">
+        <ErrorMessage
+          message="We couldn't load the product details. Please check your connection."
+          onRetry={refetch}
+        />
+      </div>
+    );
+  }
+
+  // -- NOT FOUND STATE  --
+  if (!product) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-center">
+        <div className="mb-4 rounded-full bg-gray-100 p-6 text-gray-400 dark:bg-slate-800">
+          <SmileySad size={48} />
+        </div>
+        <h2 className="mb-2 text-2xl font-bold text-gray-800 dark:text-white">
+          Product Not Found
+        </h2>
+        <p className="mb-8 max-w-md text-gray-500 dark:text-gray-400">
+          The product you are looking for might have been removed or is
+          temporarily unavailable.
+        </p>
+        <Link
+          to="/products"
+          className="rounded-lg bg-primary px-8 py-3 font-bold text-white transition hover:bg-blue-700 shadow-lg shadow-blue-500/30"
+        >
+          Browse Other Products
+        </Link>
+      </div>
+    );
+  }
+
+  // SUCCESS STATE (Render Product)
   const reviews = product.reviews || [];
   const avgRating =
     reviews.length > 0

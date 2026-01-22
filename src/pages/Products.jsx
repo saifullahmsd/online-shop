@@ -33,15 +33,15 @@ const Products = () => {
 
   useEffect(() => {
     const urlSearch = searchParams.get("search") || "";
-
-    if (urlSearch !== filters.search) {
-      setFilters((prev) => ({ ...prev, search: urlSearch }));
-    }
-
     const urlCategory = searchParams.get("category") || "all";
-    if (urlCategory !== filters.category) {
-      setFilters((prev) => ({ ...prev, category: urlCategory }));
-    }
+
+    // eslint-disable-next-line -- Syncing state with URL is a valid use case
+    setFilters((prev) => {
+      if (urlSearch === prev.search && urlCategory === prev.category) {
+        return prev;
+      }
+      return { ...prev, search: urlSearch, category: urlCategory };
+    });
   }, [searchParams]);
 
   const debouncedSearch = useDebounce(filters.search, DEBOUNCE.SEARCH);
@@ -60,10 +60,17 @@ const Products = () => {
     setSearchParams(params);
   }, [filters, setSearchParams]);
 
+  const filterKey = `${filters.category}-${filters.sortBy}-${filters.search}`;
+  const prevFilterKeyRef = useRef(filterKey);
+
   useEffect(() => {
-    setDisplayLimit(12);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [filters.category, filters.sortBy, filters.search]);
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey;
+      // eslint-disable-next-line -- Resetting pagination on filter change is valid
+      setDisplayLimit(12);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [filterKey]);
 
   const [sortKey, sortOrder] = filters.sortBy.split("-");
   const { data, isLoading, isError, refetch } = useGetAllProductsQuery({
@@ -101,9 +108,10 @@ const Products = () => {
       rootMargin: "20px",
       threshold: 1.0,
     });
-    if (observerTarget.current) observer.observe(observerTarget.current);
+    const currentTarget = observerTarget.current;
+    if (currentTarget) observer.observe(currentTarget);
     return () => {
-      if (observerTarget.current) observer.unobserve(observerTarget.current);
+      if (currentTarget) observer.unobserve(currentTarget);
     };
   }, [handleObserver]);
 

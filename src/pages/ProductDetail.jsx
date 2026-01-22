@@ -18,7 +18,7 @@ import {
   Heart,
   SmileySad,
 } from "phosphor-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // eslint-disable-line no-unused-vars -- Used as motion.button JSX
 import ImageGallery from "../components/product-detail/ImageGallery";
 import Reviews from "../components/product-detail/Reviews";
 import ReviewForm from "../components/product-detail/ReviewForm";
@@ -229,8 +229,8 @@ const ProductDetail = () => {
                 <button
                   onClick={handleWishlist}
                   className={`hidden rounded-lg border p-3 transition-colors sm:block ${isWishlisted
-                      ? "border-red-200 bg-red-50 text-red-500 dark:bg-red-900/20 dark:border-red-900"
-                      : "border-gray-200 text-gray-400 hover:text-red-500 dark:border-slate-700 dark:text-gray-300 dark:hover:text-red-500"
+                    ? "border-red-200 bg-red-50 text-red-500 dark:bg-red-900/20 dark:border-red-900"
+                    : "border-gray-200 text-gray-400 hover:text-red-500 dark:border-slate-700 dark:text-gray-300 dark:hover:text-red-500"
                     }`}
                 >
                   <Heart size={24} weight={isWishlisted ? "fill" : "bold"} />

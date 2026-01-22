@@ -40,9 +40,7 @@ const StyledNavLink = ({ to, children }) => (
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { items = [], totalQuantity } = useSelector(
-    (state) => state.cart || {}
-  );
+  const { totalQuantity } = useSelector((state) => state.cart || {});
   const { user, isAuthenticated, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get("search") || "";
@@ -52,12 +50,6 @@ const Navbar = () => {
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (searchTerm !== urlSearchQuery) {
-      setSearchTerm(urlSearchQuery);
-    }
-  }, [urlSearchQuery]);
 
   const debouncedTerm = useDebounce(searchTerm, DEBOUNCE.SEARCH);
 

@@ -8,12 +8,11 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-// REGISTER USER
+
 export const registerUser = createAsyncThunk(
   "auth/register",
   async ({ email, password, firstName, lastName }, { rejectWithValue }) => {
     try {
-      // Create User in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -21,12 +20,10 @@ export const registerUser = createAsyncThunk(
       );
       const user = userCredential.user;
 
-      // 2. Update "Display Name"
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`,
       });
 
-      // 3. Save Extra Info
       const userData = {
         id: user.uid,
         firstName,
@@ -46,7 +43,7 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// LOGIN USER
+
 export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {
@@ -79,7 +76,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-// UPDATE USER PROFILE
+
 export const updateUserProfile = createAsyncThunk(
   "auth/updateProfile",
   async (updates, { getState, rejectWithValue }) => {
@@ -97,12 +94,12 @@ export const updateUserProfile = createAsyncThunk(
   }
 );
 
-// LOGOUT
+
 export const logoutUser = createAsyncThunk("auth/logout", async () => {
   await signOut(auth);
 });
 
-// --- 2. SLICE ---
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -120,7 +117,6 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // REGISTER
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -134,7 +130,6 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // LOGIN
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -149,11 +144,9 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // UPDATE PROFILE
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.user = action.payload;
       })
-      // LOGOUT
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;

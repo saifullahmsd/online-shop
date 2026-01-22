@@ -3,7 +3,6 @@ import { toast } from "react-hot-toast";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 
-// --- HELPERS ---
 const calculateTotals = (items) => {
   const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = items.reduce(
@@ -16,16 +15,12 @@ const calculateTotals = (items) => {
   };
 };
 
-//  THUNKS (Database Actions)
 
-// Save Cart to Cloud
 export const syncCartToCloud = createAsyncThunk(
   "cart/sync",
   async (_, { getState }) => {
     const { user } = getState().auth;
     const { items } = getState().cart;
-
-    // Only save if user is logged in
     if (user && user.id) {
       const userRef = doc(db, "users", user.id);
 
@@ -34,7 +29,7 @@ export const syncCartToCloud = createAsyncThunk(
   }
 );
 
-// Load Cart from Cloud
+
 export const fetchCartFromCloud = createAsyncThunk(
   "cart/fetch",
   async (_, { getState, rejectWithValue }) => {
@@ -55,7 +50,7 @@ export const fetchCartFromCloud = createAsyncThunk(
   }
 );
 
-// --- SLICE ---
+
 const initialState = {
   items: JSON.parse(localStorage.getItem("cart") || "[]"),
   ...calculateTotals(JSON.parse(localStorage.getItem("cart") || "[]")),

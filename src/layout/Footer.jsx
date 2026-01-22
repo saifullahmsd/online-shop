@@ -12,7 +12,6 @@ const Footer = () => {
     <footer className="bg-gray-100 p-8 text-gray-600 md:p-12 dark:bg-slate-900 dark:text-gray-400 border-t border-gray-200 dark:border-slate-800 transition-colors duration-300">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
-          {/* Brand */}
           <div>
             <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
               OnlineShop
@@ -23,7 +22,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h4 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Quick Links
@@ -64,7 +62,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Categories */}
           <div>
             <h4 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Categories
@@ -105,7 +102,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
             <h4 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
               Customer Support

@@ -6,8 +6,6 @@ import { toast } from "react-hot-toast";
 import { CircleNotch, ShieldCheck } from "phosphor-react";
 import { useCreateOrderMutation } from "../api/productsApi";
 import { SHIPPING, TAX_RATE } from "../utils/constants";
-
-// Components
 import AddressForm from "../components/checkout/AddressForm";
 import PaymentMethod from "../components/checkout/PaymentMethod";
 import PageTransition from "../components/shared/PageTransition";
@@ -29,7 +27,6 @@ const Checkout = () => {
     }
   }, [items, navigate]);
 
-  // Form State
   const [formData, setFormData] = useState({
     fullName: user ? `${user.firstName} ${user.lastName}` : "",
     email: user ? user.email : "",
@@ -49,12 +46,10 @@ const Checkout = () => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    //  Calculations
     const shipping = totalAmount > SHIPPING.FREE_THRESHOLD ? 0 : SHIPPING.COST;
     const tax = totalAmount * TAX_RATE;
     const finalTotal = totalAmount + shipping + tax;
 
-    //  Prepare Order Object
     const newOrder = {
       userId: user?.id || "guest",
       userInfo: {
@@ -75,10 +70,8 @@ const Checkout = () => {
     };
 
     try {
-      //  Send to Firebase
       await createOrder(newOrder).unwrap();
 
-      //  Success Handling
       orderPlaced.current = true;
       dispatch(clearCart());
       toast.success("Order placed successfully!");
@@ -88,7 +81,6 @@ const Checkout = () => {
     }
   };
 
-  // Calculations for UI
   const shipping = totalAmount > 50 ? 0 : 10;
   const tax = totalAmount * 0.05;
   const finalTotal = totalAmount + shipping + tax;
@@ -104,7 +96,6 @@ const Checkout = () => {
           onSubmit={handlePlaceOrder}
           className="grid grid-cols-1 gap-8 lg:grid-cols-3"
         >
-          {/* LEFT COLUMN: FORMS */}
           <div className="lg:col-span-2">
             <AddressForm formData={formData} handleChange={handleInputChange} />
             <PaymentMethod
@@ -113,14 +104,12 @@ const Checkout = () => {
             />
           </div>
 
-          {/* RIGHT COLUMN: SUMMARY */}
           <div className="lg:col-span-1">
             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <h3 className="mb-4 text-lg font-bold text-gray-800 dark:text-white">
                 Order Summary
               </h3>
 
-              {/* Items List (Small) */}
               <div className="mb-4 max-h-60 overflow-y-auto space-y-3 custom-scrollbar">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">

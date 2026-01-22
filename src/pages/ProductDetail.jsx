@@ -19,8 +19,6 @@ import {
   SmileySad,
 } from "phosphor-react";
 import { motion } from "framer-motion";
-
-// Components
 import ImageGallery from "../components/product-detail/ImageGallery";
 import Reviews from "../components/product-detail/Reviews";
 import ReviewForm from "../components/product-detail/ReviewForm";
@@ -73,10 +71,8 @@ const ProductDetail = () => {
     await addReview({ productId: id, newReview }).unwrap();
   };
 
-  // LOADING STATE
   if (isLoading) return <ProductDetailSkeleton />;
 
-  //  ERROR STATE
   if (isError) {
     return (
       <div className="container mx-auto px-4 py-20">
@@ -88,7 +84,6 @@ const ProductDetail = () => {
     );
   }
 
-  // -- NOT FOUND STATE  --
   if (!product) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -112,13 +107,12 @@ const ProductDetail = () => {
     );
   }
 
-  // SUCCESS STATE (Render Product)
   const reviews = product.reviews || [];
   const avgRating =
     reviews.length > 0
       ? (
-          reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-        ).toFixed(1)
+        reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+      ).toFixed(1)
       : product.rating;
 
   const originalPrice = product.price / (1 - product.discountPercentage / 100);
@@ -135,7 +129,6 @@ const ProductDetail = () => {
           url={window.location.href}
         />
 
-        {/* Breadcrumbs */}
         <nav className="mb-6 flex text-sm text-gray-500 dark:text-gray-400">
           <Link to="/" className="hover:text-primary">
             Home
@@ -151,10 +144,8 @@ const ProductDetail = () => {
         </nav>
 
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-          {/* Left: Gallery */}
           <ImageGallery images={product.images} thumbnail={product.thumbnail} />
 
-          {/* Right: Info */}
           <div className="flex flex-col">
             <span className="mb-2 text-sm font-bold uppercase tracking-wide text-primary">
               {product.brand || "Generic Brand"}
@@ -163,7 +154,6 @@ const ProductDetail = () => {
               {product.title}
             </h1>
 
-            {/* Rating */}
             <div className="mb-4 flex items-center gap-2">
               <div className="flex text-yellow-400">
                 <Star weight="fill" />
@@ -181,7 +171,6 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            {/* Pricing */}
             <div className="mb-6 rounded-lg bg-gray-50 p-4 dark:bg-slate-800">
               <div className="flex items-end gap-3">
                 <span className="text-4xl font-bold text-primary">
@@ -207,7 +196,6 @@ const ProductDetail = () => {
               {product.description}
             </p>
 
-            {/* Add to Cart Section */}
             <div className="fixed bottom-0 inset-x-0 z-30 w-full border-t border-gray-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:bg-slate-900 dark:border-slate-800 md:static md:mb-8 md:border-0 md:bg-transparent md:p-0 md:shadow-none">
               <div className="flex flex-col gap-4 sm:flex-row container mx-auto md:w-auto md:mx-0">
                 <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 dark:bg-slate-800 dark:border-slate-700 md:w-auto">
@@ -240,11 +228,10 @@ const ProductDetail = () => {
 
                 <button
                   onClick={handleWishlist}
-                  className={`hidden rounded-lg border p-3 transition-colors sm:block ${
-                    isWishlisted
+                  className={`hidden rounded-lg border p-3 transition-colors sm:block ${isWishlisted
                       ? "border-red-200 bg-red-50 text-red-500 dark:bg-red-900/20 dark:border-red-900"
                       : "border-gray-200 text-gray-400 hover:text-red-500 dark:border-slate-700 dark:text-gray-300 dark:hover:text-red-500"
-                  }`}
+                    }`}
                 >
                   <Heart size={24} weight={isWishlisted ? "fill" : "bold"} />
                 </button>
@@ -253,7 +240,6 @@ const ProductDetail = () => {
 
             <div className="h-24 md:h-0"></div>
 
-            {/* Trust Badges */}
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 sm:grid-cols-3 dark:text-gray-400">
               <div className="flex flex-col items-center gap-2 text-center">
                 <Truck size={24} className="text-primary" />{" "}
@@ -271,7 +257,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* REVIEWS & FORM */}
         <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Reviews reviews={reviews} />
@@ -284,7 +269,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* RELATED PRODUCTS */}
         {relatedData?.products?.length > 0 && (
           <div className="mt-16">
             <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">

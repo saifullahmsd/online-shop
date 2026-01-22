@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGetAllProductsQuery } from "../api/productsApi";
 import { Funnel, CircleNotch } from "phosphor-react";
-
-// Components
 import ProductCard from "../components/shared/ProductCard";
 import FilterSidebar from "../components/products/FilterSidebar";
 import SortDropdown from "../components/products/SortDropdown";
@@ -22,7 +20,6 @@ const Products = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerTarget = useRef(null);
 
-  // Initialize State
   const initialFilters = {
     search: searchParams.get("search") || "",
     category: searchParams.get("category") || "all",
@@ -49,7 +46,6 @@ const Products = () => {
 
   const debouncedSearch = useDebounce(filters.search, DEBOUNCE.SEARCH);
 
-  //  Sync State
   useEffect(() => {
     const params = {};
     if (filters.search) params.search = filters.search;
@@ -69,7 +65,6 @@ const Products = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.category, filters.sortBy, filters.search]);
 
-  // API Query
   const [sortKey, sortOrder] = filters.sortBy.split("-");
   const { data, isLoading, isError, refetch } = useGetAllProductsQuery({
     search: debouncedSearch,
@@ -83,7 +78,6 @@ const Products = () => {
   useAutoRetry(isError, refetch);
   const allProducts = data?.products || [];
 
-  // Pagination
   const visibleProducts = allProducts.slice(0, displayLimit);
   const hasMore = displayLimit < allProducts.length;
 
@@ -113,7 +107,6 @@ const Products = () => {
     };
   }, [handleObserver]);
 
-  // Handlers
   const handleCategoryChange = useCallback((cat) => {
     setFilters((prev) => ({ ...prev, category: cat }));
     setIsSidebarOpen(false);
@@ -145,7 +138,6 @@ const Products = () => {
           description="Browse our extensive collection."
         />
 
-        {/* Header */}
         <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
             {filters.category === "all"
@@ -161,7 +153,6 @@ const Products = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[250px_1fr]">
-          {/* Sidebar */}
           <div className="hidden lg:block">
             <FilterSidebar
               filters={filters}
@@ -184,7 +175,6 @@ const Products = () => {
           </div>
 
           <div className="min-w-0">
-            {/* Controls */}
             <div className="mb-6 flex justify-end rounded-xl bg-white p-4 shadow-sm border border-gray-100 dark:bg-slate-800 dark:border-slate-700">
               <SortDropdown
                 sort={filters.sortBy}
@@ -194,7 +184,6 @@ const Products = () => {
               />
             </div>
 
-            {/* Content */}
             {isLoading ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {[...Array(12)].map((_, i) => (

@@ -13,7 +13,6 @@ import { CircleNotch } from "phosphor-react";
 import useDebounce from "./hooks/useDebounce";
 import { DEBOUNCE } from "./utils/constants";
 
-// LAZY LOAD PAGES
 const Home = lazy(() => import("./pages/Home"));
 const Products = lazy(() => import("./pages/Products"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
@@ -27,12 +26,10 @@ const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Profile Pages
 const ProfileLayout = lazy(() => import("./components/profile/ProfileLayout"));
 const UserProfile = lazy(() => import("./pages/profile/UserProfile"));
 const UserOrders = lazy(() => import("./pages/profile/UserOrders"));
 
-// Admin Pages
 const AdminRoute = lazy(() => import("./components/auth/AdminRoute"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -55,7 +52,6 @@ const App = () => {
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
 
-  // Initial Load: Fetch Cloud Data on Login
   useEffect(() => {
     if (user) {
       dispatch(fetchCartFromCloud());
@@ -78,7 +74,6 @@ const App = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [items, dispatch]);
 
-  //  Theme Handler
   useEffect(() => {
     const root = window.document.documentElement;
     if (mode === "dark") {
@@ -107,7 +102,6 @@ const App = () => {
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
 
-            {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="checkout" element={<Checkout />} />
               <Route path="order-success" element={<OrderSuccess />} />
@@ -117,7 +111,6 @@ const App = () => {
               </Route>
             </Route>
 
-            {/* Admin Routes */}
             <Route element={<AdminRoute />}>
               <Route path="admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />

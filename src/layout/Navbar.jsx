@@ -27,12 +27,10 @@ const StyledNavLink = ({ to, children }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
-      `relative font-medium transition-colors ${
-        isActive
-          ? "text-primary"
-          : "text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-white"
-      } after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:origin-center after:scale-x-0 after:bg-primary after:transition-transform ${
-        isActive ? "after:scale-x-100" : "hover:after:scale-x-100"
+      `relative font-medium transition-colors ${isActive
+        ? "text-primary"
+        : "text-slate-600 hover:text-primary dark:text-slate-300 dark:hover:text-white"
+      } after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:origin-center after:scale-x-0 after:bg-primary after:transition-transform ${isActive ? "after:scale-x-100" : "hover:after:scale-x-100"
       }`
     }
   >
@@ -49,7 +47,6 @@ const Navbar = () => {
   const [searchParams] = useSearchParams();
   const urlSearchQuery = searchParams.get("search") || "";
 
-  // --- Local State ---
   const [searchTerm, setSearchTerm] = useState(urlSearchQuery);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
@@ -95,7 +92,6 @@ const Navbar = () => {
     <>
       <nav className="sticky top-0 z-50 w-full bg-white/90 border-b border-gray-100 shadow-sm backdrop-blur-md dark:bg-slate-900/90 dark:border-slate-800 transition-colors duration-300">
         <div className="container mx-auto flex items-center justify-between p-4">
-          {/* Brand logo  */}
           <Link
             to="/"
             className="flex items-center gap-1 text-primary transition-opacity hover:opacity-80"

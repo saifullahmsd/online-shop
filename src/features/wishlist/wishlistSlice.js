@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 
-// 1.  Add/Remove Item in Cloud
+
 export const toggleWishlistCloud = createAsyncThunk(
   "wishlist/toggleCloud",
   async (product, { getState, rejectWithValue }) => {
@@ -24,13 +24,11 @@ export const toggleWishlistCloud = createAsyncThunk(
 
     try {
       if (isInWishlist) {
-        // Remove from Cloud
         await updateDoc(userRef, {
           wishlist: arrayRemove(product),
         });
         return { action: "remove", product };
       } else {
-        // Add to Cloud
         await setDoc(
           userRef,
           {
@@ -46,7 +44,7 @@ export const toggleWishlistCloud = createAsyncThunk(
   }
 );
 
-// 2. Fetch Wishlist on Login
+
 export const fetchWishlistFromCloud = createAsyncThunk(
   "wishlist/fetch",
   async (_, { getState, rejectWithValue }) => {
@@ -67,7 +65,7 @@ export const fetchWishlistFromCloud = createAsyncThunk(
   }
 );
 
-// --- SLICE ---
+
 const wishlistSlice = createSlice({
   name: "wishlist",
   initialState: {
@@ -93,7 +91,6 @@ const wishlistSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Handle Cloud Fetch
     builder.addCase(fetchWishlistFromCloud.fulfilled, (state, action) => {
       state.items = action.payload;
       localStorage.setItem("wishlist", JSON.stringify(state.items));
@@ -106,7 +103,6 @@ export const { toggleWishlistLocal, clearWishlist } = wishlistSlice.actions;
 export const toggleWishlist = (product) => (dispatch, getState) => {
   const { user } = getState().auth;
 
-  // Always update local UI first (Immediate feedback)
   dispatch(toggleWishlistLocal(product));
 
   if (user) {
